@@ -5,10 +5,13 @@ import rospy
 import serial
 from geometry_msgs.msg import PointStamped
 from quad_track.msg import IMUDataStamped
-
+import tf
 
 pub = rospy.Publisher('dataout', IMUDataStamped)
+broadcaster = tf.TransformBroadcaster()
 ser = serial.Serial("/dev/ttyUSB0", 38400, timeout=1)
+
+PI = 3.14159265359
 
 
 def update(position):
@@ -29,24 +32,29 @@ def update(position):
     ser.write(bytearray(bytesout))
 
     # receive quadrotor pose + rates + start character
-    bytesin = ser.read(13)
-    
+    bytesin = ser.read(13)   
+
     if len(bytesin) == 13 and ord(bytesin[0]) == 75:
         datain = [0]*6
         for i in range(0,len(datain)):
             datain[i]=(ord(bytesin[2*i+1])<<8)+ord(bytesin[2*i+2])
-        #rospy.loginfo(datain)
         
         quad_pose = IMUDataStamped()
         quad_pose.header.stamp = rospy.Time.now()
         quad_pose.droll = datain[0]
         quad_pose.dpitch = datain[1]
         quad_pose.dyaw = datain[2]
-        quad_pose.roll = datain[3]
-        quad_pose.pitch = datain[4]
-        quad_pose.yaw = datain[5]
+        quad_pose.roll = (datain[3]-32768)/350.0
+        quad_pose.pitch = (datain[4]-32768)/350.0
+        quad_pose.yaw = (datain[5]-32768)/350.0
 
         pub.publish(quad_pose)
+
+        # send transform data to rviz
+        broadcaster.sendTransform((position.point.z,position.point.y,position.point.x), \
+            tf.transformations.quaternion_from_euler(quad_pose.roll*PI/180, quad_pose.pitch*PI/180, quad_pose.yaw*PI/180), \
+            rospy.Time.now(),"quad","world")
+
         
     else:
         rospy.logwarn("Bad data received")
