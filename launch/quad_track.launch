@@ -43,11 +43,15 @@
       </rosparam>
     </node>
   </group>
-
-
+ 
   <!-- tracker node -->
   <node pkg="quad_track" type="quad_track"
   	name="quad_tracking_node" output="screen" respawn="true"/> 
+
+  <param name="robot_description" command="cat $(find quad_track)/quadmodel.xml" />
+  <node name="rviz" pkg="rviz" type="rviz" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+  <node name="Pic_Serial" pkg="quad_track" type="pic_serial.py" output="screen"/>
 
 
 </launch>

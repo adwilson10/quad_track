@@ -52,7 +52,7 @@ public:
         ros::Time start_time = ros::Time::now();
         ros::Time tcur = ros::Time::now();
         ros::Time tcloud = (*input_cloud).header.stamp;
-
+      
         sensor_msgs::PointCloud2::Ptr ros_cloud(new sensor_msgs::PointCloud2 ());
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_1 (new pcl::PointCloud<pcl::PointXYZ>);
