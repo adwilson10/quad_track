@@ -5,6 +5,7 @@ import rospy
 import serial
 from geometry_msgs.msg import PointStamped
 from quad_track.msg import IMUDataStamped
+from sensor_msgs.msg import Joy
 import tf
 
 pub = rospy.Publisher('dataout', IMUDataStamped)
@@ -13,12 +14,16 @@ ser = serial.Serial("/dev/ttyUSB0", baudrate=38400, bytesize=8, stopbits=1, time
 
 PI = 3.14159265359
 
+# initilize joystick global vars
+axis = [0.0,0.0,0.0]
+buttons=[0,0,0,0]
+
 
 def update(position):
 
     x = int(round(position.point.x))
-    y = int(round(position.point.y))
-    z = int(round(position.point.z))
+    y = int(buttons[0]*100)
+    z = int((100*(axis[2]+1)))
 
     dataout = [x,y,z,x,y,z]     #must be list of unsigned shorts
 
@@ -34,6 +39,8 @@ def update(position):
 
     # receive quadrotor pose + rates + start character
     bytesin = ser.read(13) 
+    print "New Data"
+    print bytesin
 
     if len(bytesin) == 13 and ord(bytesin[0]) == 75:
 
@@ -62,6 +69,15 @@ def update(position):
         #rospy.logwarn("Bad data received")
         ser.flushInput()
 
+# Joystick callback - retrieve current joystick and button data
+def joycall(joydata):
+    global axis
+    global buttons
+
+    axis = joydata.axes
+    buttons = joydata.buttons[0:4]
+    axis = [joydata.axes[0],joydata.axes[1],joydata.axes[3]]
+
 
 def PicSerial():
     rospy.init_node('Pic_Serial')
@@ -70,6 +86,7 @@ def PicSerial():
         ser.open()
     rospy.loginfo("Serial port opened: %s", ser.isOpen())
     rospy.Subscriber("quad_position", PointStamped, update)
+    rospy.Subscriber("joy",Joy,joycall)
 
     rospy.spin()
     ser.close()

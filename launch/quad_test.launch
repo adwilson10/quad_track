@@ -2,5 +2,7 @@
         <param name="robot_description" command="cat $(find quad_track)/quadmodel.xml" />
         <node name="rviz" pkg="rviz" type="rviz" />
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+	<param name="joy_node/coalesce_interval" value="0.025" />
+	<node name="joy_node" pkg="joy" type="joy_node" />
         <node name="Pic_Serial" pkg="quad_track" type="pic_serial.py" output="screen"/>
 </launch>
