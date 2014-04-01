@@ -10,7 +10,7 @@ import tf
 
 pub = rospy.Publisher('dataout', IMUDataStamped)
 broadcaster = tf.TransformBroadcaster()
-ser = serial.Serial("/dev/ttyUSB0", baudrate=38400, bytesize=8, stopbits=1, timeout=0.06, writeTimeout=0.1)
+ser = serial.Serial("/dev/ttyUSB0", baudrate=57600, bytesize=8, stopbits=1, timeout=0.06, writeTimeout=0.1)
 
 PI = 3.14159265359
 
@@ -28,26 +28,26 @@ def update(position):
     dataout = [x,y,z,x,y,z]     #must be list of unsigned shorts
 
     # send out commands
-    bytesout = [0]*(2*len(dataout)+1)
-    bytesout[0] = "K"
-    for i in range(0,len(dataout)):
-        bytesout[2*i+1]=dataout[i]>>8
-        bytesout[2*i+2]=dataout[i]-(bytesout[2*i+1]<<8)
-    ser.flushInput()
-    ser.flushOutput()   
-    ser.write(bytearray(bytesout))
+    #bytesout = [0]*(2*len(dataout)+1)
+    #bytesout[0] = "K"
+    #for i in range(0,len(dataout)):
+    #    bytesout[2*i+1]=dataout[i]>>8
+    #    bytesout[2*i+2]=dataout[i]-(bytesout[2*i+1]<<8)
+    #ser.flushInput()
+    #ser.flushOutput()   
+    #ser.write(bytearray(bytesout))
+    ser.write(bytearray(["K",int((100*(axis[2]+1)))]))
+
 
     # receive quadrotor pose + rates + start character
-    bytesin = ser.read(13) 
-    print "New Data"
-    print bytesin
+    bytesin = ser.read(13)
 
     if len(bytesin) == 13 and ord(bytesin[0]) == 75:
 
         datain = [0]*6
         for i in range(0,len(datain)):
             datain[i]=(ord(bytesin[2*i+1])<<8)+ord(bytesin[2*i+2])
-        
+
         quad_pose = IMUDataStamped()
         quad_pose.header.stamp = rospy.Time.now()
         quad_pose.droll = (datain[0]-32768)/32.0
@@ -64,9 +64,8 @@ def update(position):
             tf.transformations.quaternion_from_euler(quad_pose.roll*PI/180, quad_pose.pitch*PI/180, quad_pose.yaw*PI/180), \
             rospy.Time.now(),"quad","camera_depth_optical_frame")
 
-        
     else:
-        #rospy.logwarn("Bad data received")
+        rospy.logwarn("Bad data received")
         ser.flushInput()
 
 # Joystick callback - retrieve current joystick and button data

@@ -2,9 +2,9 @@
 
 <link name="quad">
   <visual>
-    <origin xyz="0 0 0" rpy="0 0 0.785" />
+    <origin xyz="0 0 -0.0005" rpy="0 0 0" />
     <geometry>
-      <box size="0.04 0.04 0.01" />
+      <box size="0.04 0.04 0.012" />
     </geometry>
     <material name="green">
       <color rgba="0 .2 0 1" />
@@ -78,37 +78,37 @@
 
 
 <joint name="joint1" type="fixed">
-    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0.785398" />
     <parent link="quad" />    
     <child link="link1" /> 
 </joint>
 
 <joint name="joint2" type="fixed">
-    <origin xyz="0 0 0" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="0 0 0.785398" />
     <parent link="quad" />    
     <child link="link2" /> 
 </joint>
 
 <joint name="joint3" type="fixed">
-    <origin xyz="0.115 0 0.005" rpy="0 0 0" />
+    <origin xyz="0.081317 0.081317 0.0049" rpy="0 0 0" />
     <parent link="quad" />    
     <child link="mot1" /> 
 </joint>
 
 <joint name="joint4" type="fixed">
-    <origin xyz="-0.115 0 0.005" rpy="0 0 0" />
+    <origin xyz="-0.081317 0.081317 0.0049" rpy="0 0 0" />
     <parent link="quad" />    
     <child link="mot2" /> 
 </joint>
 
 <joint name="joint5" type="fixed">
-    <origin xyz="0 0.115 0.005" rpy="0 0 0" />
+    <origin xyz="0.081317 -0.081317 0.0049" rpy="0 0 0" />
     <parent link="quad" />    
     <child link="mot3" /> 
 </joint>
 
 <joint name="joint6" type="fixed">
-    <origin xyz="0 -0.115 0.005" rpy="0 0 0" />
+    <origin xyz="-0.081317 -0.081317 0.0049" rpy="0 0 0" />
     <parent link="quad" />    
     <child link="mot4" /> 
 </joint>
