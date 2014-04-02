@@ -10,7 +10,7 @@ import tf
 
 pub = rospy.Publisher('dataout', IMUDataStamped)
 broadcaster = tf.TransformBroadcaster()
-ser = serial.Serial("/dev/ttyUSB0", baudrate=57600, bytesize=8, stopbits=1, timeout=0.06, writeTimeout=0.1)
+ser = serial.Serial("/dev/ttyUSB0", baudrate=38400, bytesize=8, stopbits=1, timeout=0.06, writeTimeout=0.1)
 
 PI = 3.14159265359
 
@@ -36,26 +36,22 @@ def update(position):
     #ser.flushInput()
     #ser.flushOutput()   
     #ser.write(bytearray(bytesout))
-    ser.write(bytearray(["K",int((100*(axis[2]+1)))]))
-
+    ser.write(bytearray(["K",int((100*(axis[2]+1))),int((100*(axis[0]+1))),int((100*((-axis[1])+1)))]))
 
     # receive quadrotor pose + rates + start character
-    bytesin = ser.read(13)
+    bytesin = ser.read(7)
 
-    if len(bytesin) == 13 and ord(bytesin[0]) == 75:
+    if len(bytesin) == 7 and ord(bytesin[0]) == 75:
 
-        datain = [0]*6
+        datain = [0]*3
         for i in range(0,len(datain)):
             datain[i]=(ord(bytesin[2*i+1])<<8)+ord(bytesin[2*i+2])
 
         quad_pose = IMUDataStamped()
         quad_pose.header.stamp = rospy.Time.now()
-        quad_pose.droll = (datain[0]-32768)/32.0
-        quad_pose.dpitch = (datain[1]-32768)/32.0
-        quad_pose.dyaw = (datain[2]-32768)/32.0
-        quad_pose.roll = (datain[3]-32768)/350.0
-        quad_pose.pitch = (datain[4]-32768)/350.0
-        quad_pose.yaw = datain[5]/180.0
+        quad_pose.roll = (datain[0]-32768)/350.0
+        quad_pose.pitch = (datain[1]-32768)/350.0
+        quad_pose.yaw = datain[2]/180.0
 
         pub.publish(quad_pose)
 
