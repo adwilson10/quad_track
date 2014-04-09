@@ -1,5 +1,8 @@
 <robot name="quad">
 
+<link name="quadz">
+</link>
+
 <link name="quad">
   <visual>
     <origin xyz="0 0 -0.0005" rpy="0 0 0" />
@@ -28,7 +31,7 @@
   <visual>
     <origin xyz="0 0 0" rpy="0 0 0" />
     <geometry>
-      <box size="0.01 .23 .01" />
+      <box size="0.01 0.23 0.01" />
     </geometry>
     <material name="blue" />
   </visual>
@@ -76,6 +79,11 @@
   </visual>
 </link>
 
+<joint name="quad" type="fixed">
+    <origin xyz="0 0 0" rpy="0 1.570796 0" />
+    <parent link="quadz" />    
+    <child link="quad" /> 
+</joint>
 
 <joint name="joint1" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 0.785398" />

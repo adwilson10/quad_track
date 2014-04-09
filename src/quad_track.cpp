@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <geometry_msgs/PointStamped.h>
 
 // PCL specific includes
 #include <pcl/point_cloud.h>
@@ -17,6 +18,8 @@
 #define MAX_CLUSTERS 1
 #define PI 3.14159
 
+geometry_msgs::PointStamped prev_pos;
+
 class QuadTracker
 {
 
@@ -24,6 +27,7 @@ private:
     ros::NodeHandle n_;
     ros::Subscriber cloud_sub;
     ros::Publisher cloud_pub[MAX_CLUSTERS];
+    ros::Publisher quad_pub;
 
 public:
     QuadTracker()
@@ -42,6 +46,8 @@ public:
             (ss.str(), 1);
         }
 
+        quad_pub = n_.advertise<geometry_msgs::PointStamped>("quad_position",1);
+
         return;
     }
 
@@ -57,7 +63,8 @@ public:
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster_1 (new pcl::PointCloud<pcl::PointXYZ>);
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
-
+        Eigen::Vector4f cluster_centroid;
+        
         ROS_DEBUG("finished declaring vars : %f", (ros::Time::now()-tcur).toSec());
         tcur = ros::Time::now();
 
@@ -126,10 +133,23 @@ public:
             ros_cloud->header.frame_id = "/camera_depth_optical_frame";
             ros_cloud->header.stamp = tcloud;
             cloud_pub[0].publish(ros_cloud);
+
+            // compute centroid for quadrotor:
+            pcl::compute3DCentroid(*cloud_cluster_1, cluster_centroid);  
+
+            geometry_msgs::PointStamped quad_pos;
+            quad_pos.header.stamp = ros::Time::now();
+            quad_pos.point.x = cluster_centroid(0);
+            quad_pos.point.y = cluster_centroid(1);
+            quad_pos.point.z = cluster_centroid(2);
+
+            quad_pub.publish(quad_pos);
+            prev_pos = quad_pos;
         
         } else {
 
             ROS_INFO("QUADROTOR NOT FOUND!!!");
+            quad_pub.publish(prev_pos);
         }
 
     }

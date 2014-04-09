@@ -14,7 +14,7 @@
       <rosparam>
         filter_field_name: z
         filter_limit_min: 0
-        filter_limit_max: 2.8
+        filter_limit_max: 2.4
         fiter_limit_negative: True
         leaf_size: 0.0075
         output_frame: /camera_depth_optical_frame
@@ -50,6 +50,8 @@
 
   <param name="robot_description" command="cat $(find quad_track)/quadmodel.xml" />
   <node name="rviz" pkg="rviz" type="rviz" />
+  <param name="joy_node/coalesce_interval" value="0.025" />
+  <node name="joy_node" pkg="joy" type="joy_node" />
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
   <node name="Pic_Serial" pkg="quad_track" type="pic_serial.py" output="screen"/>
 
